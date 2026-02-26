@@ -32,11 +32,11 @@ public static class Hl7v2
 
             var xmlParser = new DefaultXMLParser();
             var lineEnding = options.LineEnding switch
-                {
-                    LineEnding.CRLF => "\r\n",
-                    LineEnding.LF => "\n",
-                    _ => throw new ArgumentOutOfRangeException(nameof(options), "options.LineEnding is not valid."),
-                };
+            {
+                LineEnding.CRLF => "\r\n",
+                LineEnding.LF => "\n",
+                _ => throw new ArgumentOutOfRangeException(nameof(options), "options.LineEnding is not valid."),
+            };
 
             var encoded = xmlParser.Encode(parsed).ReplaceLineEndings(lineEnding);
 
