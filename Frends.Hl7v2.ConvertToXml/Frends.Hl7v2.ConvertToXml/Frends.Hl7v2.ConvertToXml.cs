@@ -19,7 +19,7 @@ public static class Hl7v2
     /// <param name="input">Essential parameters.</param>
     /// <param name="options">Additional parameters.</param>
     /// <param name="cancellationToken">A cancellation token provided by Frends Platform.</param>
-    /// <returns>object { bool Success, string Output, object Error { string Message, Exception AdditionalInfo } }</returns>
+    /// <returns>object { bool Success, string Xml, object Error { string Message, Exception AdditionalInfo } }</returns>
     public static Result ConvertToXml(
         [PropertyTab] Input input,
         [PropertyTab] Options options,
@@ -27,6 +27,8 @@ public static class Hl7v2
     {
         try
         {
+            if (string.IsNullOrEmpty(input.Hl7v2Message))
+                throw new ArgumentNullException(nameof(input), "You must provide an HL7 message.");
             var parser = new PipeParser();
             var parsed = parser.Parse(input.Hl7v2Message);
 

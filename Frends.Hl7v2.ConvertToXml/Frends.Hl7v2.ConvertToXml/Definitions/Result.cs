@@ -14,7 +14,12 @@ public class Result
     /// <summary>
     /// Message in Xml format.
     /// </summary>
-    /// <example>foobar,foobar</example>
+    /// <example>
+    /// &lt;QRY_R02 xmlns="urn:hl7-org:v2xml"&gt;
+    /// &lt;MSH&gt;
+    /// &lt;/MSH&gt;
+    /// &lt;/QRY_R02&gt;
+    /// </example>
     public string Xml { get; set; }
 
     /// <summary>
