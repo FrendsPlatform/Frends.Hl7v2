@@ -12,6 +12,7 @@ public class Options
     /// Define the line ending of the output.
     /// </summary>
     /// <example>LineEnding.LF</example>
+    [DefaultValue(LineEnding.LF)]
     public LineEnding LineEnding { get; set; } = LineEnding.LF;
 
     /// <summary>

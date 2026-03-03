@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Frends.Hl7v2.CreateFromXml.Tests;
 
 [TestFixture]
-public class FunctionalTests : TestBase
+public class FunctionalTests
 {
     private string hl7V2Message;
 
@@ -30,7 +30,7 @@ public class FunctionalTests : TestBase
             Xml = xmlMessage,
         };
 
-        var result = Hl7v2.CreateFromXml(input, DefaultOptions(), CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(input, new Options(), CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
         Assert.That(result.Hl7v2Message, Is.EqualTo(hl7V2Message));
@@ -43,8 +43,10 @@ public class FunctionalTests : TestBase
         {
             Xml = "Invalid message",
         };
-        var opt = DefaultOptions();
-        opt.ThrowErrorOnFailure = false;
+        var opt = new Options
+        {
+            ThrowErrorOnFailure = false,
+        };
 
         var result = Hl7v2.CreateFromXml(input, opt, CancellationToken.None);
 
