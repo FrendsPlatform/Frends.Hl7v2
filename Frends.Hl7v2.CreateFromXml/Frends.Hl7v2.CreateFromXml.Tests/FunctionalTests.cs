@@ -23,7 +23,7 @@ public class FunctionalTests : TestBase
     }
 
     [Test]
-    public void Should_Convert_Hl7v2_Message_To_Xml()
+    public void Should_Convert_Xml_To_Hl7v2_Message()
     {
         var input = new Input
         {
