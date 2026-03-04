@@ -1,0 +1,1 @@
+MSH|^~\&|CohieCentral|COHIE|Clinical Data Provider|TCH|20060228155525||QRY^R02|1|P|2.3|QRD|20060228155525|R|I||||10^RD&Records&0126|38923^^^^^^^^&TCH

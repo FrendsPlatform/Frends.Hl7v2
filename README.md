@@ -4,6 +4,7 @@ Frends tasks for Hl7v2 related operations.
 
 # Tasks
 
+- [Frends.Hl7v2.CreateFromXml](Frends.Hl7v2.CreateFromXml/README.md)
 - [Frends.Hl7v2.ConvertToXml](Frends.Hl7v2.ConvertToXml/README.md)
 
 # Contributing
