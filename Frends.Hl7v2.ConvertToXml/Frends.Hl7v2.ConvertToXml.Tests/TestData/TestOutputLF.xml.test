@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<QRY_R02 xmlns="urn:hl7-org:v2xml">
+  <MSH>
+    <MSH.1>|</MSH.1>
+    <MSH.2>^~\&amp;</MSH.2>
+    <MSH.3>
+      <HD.1>CohieCentral</HD.1>
+    </MSH.3>
+    <MSH.4>
+      <HD.1>COHIE</HD.1>
+    </MSH.4>
+    <MSH.5>
+      <HD.1>Clinical Data Provider</HD.1>
+    </MSH.5>
+    <MSH.6>
+      <HD.1>TCH</HD.1>
+    </MSH.6>
+    <MSH.7>
+      <TS.1>20060228155525</TS.1>
+    </MSH.7>
+    <MSH.9>
+      <CM_MSG.1>QRY</CM_MSG.1>
+      <CM_MSG.2>R02</CM_MSG.2>
+    </MSH.9>
+    <MSH.10>1</MSH.10>
+    <MSH.11>
+      <PT.1>P</PT.1>
+    </MSH.11>
+    <MSH.12>2.3</MSH.12>
+  </MSH>
+</QRY_R02>
