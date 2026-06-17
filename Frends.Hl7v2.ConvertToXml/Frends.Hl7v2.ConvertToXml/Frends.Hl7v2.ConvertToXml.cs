@@ -30,7 +30,12 @@ public static class Hl7v2
             if (string.IsNullOrEmpty(input.Hl7v2Message))
                 throw new ArgumentNullException(nameof(input), "You must provide an HL7 message.");
             var parser = new PipeParser();
-            var parsed = parser.Parse(input.Hl7v2Message);
+
+            var normalizedMessage = input.Hl7v2Message
+                .Replace("\r\n", "\r")
+                .Replace("\n", "\r");
+
+            var parsed = parser.Parse(normalizedMessage);
 
             var xmlParser = new DefaultXMLParser();
             var lineEnding = options.LineEnding switch

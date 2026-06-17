@@ -13,8 +13,8 @@ public class ErrorHandlerTest
     [Test]
     public void Should_Throw_Error_When_ThrowErrorOnFailure_Is_True()
     {
-        var ex = Assert.Throws<Exception>(() =>
-            Hl7v2.ConvertToXml(new Input(), new Options(), CancellationToken.None));
+        var ex = Assert.Throws<Exception>((Action)(() =>
+            Hl7v2.ConvertToXml(new Input(), new Options(), CancellationToken.None)));
         Assert.That(ex, Is.Not.Null);
     }
 
@@ -34,8 +34,8 @@ public class ErrorHandlerTest
         {
             ErrorMessageOnFailure = CustomErrorMessage,
         };
-        var ex = Assert.Throws<Exception>(() =>
-            Hl7v2.ConvertToXml(new Input(), options, CancellationToken.None));
+        var ex = Assert.Throws<Exception>((Action)(() =>
+            Hl7v2.ConvertToXml(new Input(), options, CancellationToken.None)));
         Assert.That(ex, Is.Not.Null);
         Assert.That(ex.Message, Contains.Substring(CustomErrorMessage));
     }
