@@ -1,0 +1,5 @@
+﻿* text=auto
+TestData/TestOutput.xml.test binary
+TestData/TestInput.hl7 binary
+TestData/TestOutputLF.xml.test binary
+TestData/TestInputLF.hl7 binary
