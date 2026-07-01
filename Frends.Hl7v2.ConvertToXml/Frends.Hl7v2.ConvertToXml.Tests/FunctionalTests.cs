@@ -120,8 +120,8 @@ public class FunctionalTests
             new Input { Hl7v2Message = hl7NoVersion },
             new Options
             {
-            LineEnding = LineEnding.LF,
-            ThrowErrorOnFailure = false,
+                LineEnding = LineEnding.LF,
+                ThrowErrorOnFailure = false,
             },
             CancellationToken.None);
 
