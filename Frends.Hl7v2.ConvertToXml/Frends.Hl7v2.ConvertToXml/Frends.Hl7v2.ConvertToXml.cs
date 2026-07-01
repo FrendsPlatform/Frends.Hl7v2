@@ -13,7 +13,8 @@ namespace Frends.Hl7v2.ConvertToXml;
 public static class Hl7v2
 {
     /// <summary>
-    /// Task to convert Hl7v2 message to Xml
+    /// Task to convert HL7v2 message to XML.
+    /// Supported HL7 versions: 2.1, 2.2, 2.3, 2.3.1, 2.4, 2.5, 2.5.1, 2.6, 2.7, 2.7.1, 2.8 and 2.8.1.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends-Hl7v2-ConvertToXml)
     /// </summary>
     /// <param name="input">Essential parameters.</param>
