@@ -37,6 +37,7 @@ public static class Hl7v2
             {
                 LineEnding.CRLF => "\r\n",
                 LineEnding.LF => "\n",
+                LineEnding.CR => "\r",
                 _ => throw new ArgumentOutOfRangeException(nameof(options), "options.LineEnding is not valid."),
             };
             var hl7Output = pipeParser.Encode(parsedMessage).ReplaceLineEndings(lineEnding);
