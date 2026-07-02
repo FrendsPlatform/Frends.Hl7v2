@@ -337,7 +337,7 @@ public class FunctionalTests
 
         sw.Stop();
 
-        Console.WriteLine($"Input: {hl7.Length / 1024 / 1024:F1}MB | Time: {sw.ElapsedMilliseconds}ms | " +
+        TestContext.WriteLine($"Input: {hl7.Length / 1024 / 1024:F1}MB | Time: {sw.ElapsedMilliseconds}ms | " +
                       $"Memory delta: {(GC.GetTotalMemory(false) - memBefore) / 1024 / 1024:F1}MB | " +
                       $"Output: {result.Xml?.Length / 1024 / 1024:F1}MB");
 
