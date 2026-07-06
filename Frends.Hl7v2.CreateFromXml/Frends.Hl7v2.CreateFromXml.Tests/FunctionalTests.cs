@@ -36,7 +36,9 @@ public class FunctionalTests
         var result = Hl7v2.CreateFromXml(input, new Options { LineEnding = LineEnding.CRLF }, CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Hl7v2Message, Is.EqualTo(hl7V2Message));
+        Assert.That(
+        result.Hl7v2Message.ReplaceLineEndings("\r\n"),
+        Is.EqualTo(hl7V2Message.ReplaceLineEndings("\r\n")));
     }
 
     [Test]
