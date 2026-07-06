@@ -1,9 +1,11 @@
-using Frends.Hl7v2.CreateFromXml.Definitions;
-using NHapi.Base.Parser;
-using NUnit.Framework;
 using System;
 using System.IO;
 using System.Threading;
+using Frends.Hl7v2.CreateFromXml.Definitions;
+using NHapi.Base.Parser;
+using NUnit.Framework;
+using NUnit.Framework.Internal;
+using static Frends.Hl7v2.CreateFromXml.Definitions.Enums;
 
 namespace Frends.Hl7v2.CreateFromXml.Tests;
 
@@ -31,7 +33,7 @@ public class FunctionalTests
             Xml = xmlMessage,
         };
 
-        var result = Hl7v2.CreateFromXml(input, new Options(), CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(input, new Options { LineEnding = LineEnding.CRLF }, CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
         Assert.That(result.Hl7v2Message, Is.EqualTo(hl7V2Message));
@@ -99,11 +101,8 @@ public class FunctionalTests
         var result = Hl7v2.CreateFromXml(input, new Options(), CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
-        // Field separator | between MSH fields
         Assert.That(result.Hl7v2Message, Does.StartWith("MSH|"));
-        // Component separator ^ used in MSH-9 (MessageType^TriggerEvent)
         Assert.That(result.Hl7v2Message, Does.Contain("QRY^R02"));
-        // Encoding characters present in MSH-2
         Assert.That(result.Hl7v2Message, Does.Contain("^~\\&"));
     }
 
@@ -136,12 +135,13 @@ public class FunctionalTests
           </PID>
         </ADT_A01>";
 
-        var result = Hl7v2.CreateFromXml(new Input { Xml = xmlWithRepetition },
-            new Options(), CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(
+            new Input { Xml = xmlWithRepetition },
+            new Options(),
+            CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
         Console.WriteLine(result.Hl7v2Message);
-        // ~ must separate repeated PID.3 values
         Assert.That(result.Hl7v2Message, Does.Contain("12345"));
         Assert.That(result.Hl7v2Message, Does.Contain("67890"));
         Assert.That(result.Hl7v2Message, Does.Contain("~"));
@@ -181,12 +181,13 @@ public class FunctionalTests
           </PID>
         </ADT_A01>";
 
-        var result = Hl7v2.CreateFromXml(new Input { Xml = xmlWithSubcomponent },
-            new Options(), CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(
+            new Input { Xml = xmlWithSubcomponent },
+            new Options(),
+            CancellationToken.None);
 
         Console.WriteLine(result.Hl7v2Message ?? result.Error?.Message);
         Assert.That(result.Success, Is.True);
-        // & must appear between HD.1, HD.2, HD.3 within CX.4
         Assert.That(result.Hl7v2Message, Does.Contain("MRN&2.16.840.1&ISO"));
     }
 
@@ -194,8 +195,10 @@ public class FunctionalTests
     public void Should_Output_CR_Only_When_LineEnding_Is_CR()
     {
         var input = new Input { Xml = xmlMessage };
-        var result = Hl7v2.CreateFromXml(input,
-            new Options { LineEnding = LineEnding.CR }, CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(
+            input,
+            new Options { LineEnding = LineEnding.CR },
+            CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
         Assert.That(result.Hl7v2Message, Does.Contain("\r"));
@@ -206,8 +209,10 @@ public class FunctionalTests
     public void Should_Output_CRLF_When_LineEnding_Is_CRLF()
     {
         var input = new Input { Xml = xmlMessage };
-        var result = Hl7v2.CreateFromXml(input,
-            new Options { LineEnding = LineEnding.CRLF }, CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(
+            input,
+            new Options { LineEnding = LineEnding.CRLF },
+            CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
         Assert.That(result.Hl7v2Message, Does.Contain("\r\n"));
@@ -216,8 +221,10 @@ public class FunctionalTests
     [Test]
     public void Should_Output_LF_When_LineEnding_Is_LF()
     {
-        var result = Hl7v2.CreateFromXml(new Input { Xml = xmlMessage },
-            new Options { LineEnding = LineEnding.LF }, CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(
+            new Input { Xml = xmlMessage },
+            new Options { LineEnding = LineEnding.LF },
+            CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
         Assert.That(result.Hl7v2Message, Does.Contain("\n"));
@@ -231,15 +238,14 @@ public class FunctionalTests
         var xmlWithCustomSep = xmlMessage
             .Replace("<MSH.1>|</MSH.1>", "<MSH.1>#</MSH.1>");
 
-        var result = Hl7v2.CreateFromXml(new Input { Xml = xmlWithCustomSep },
-            new Options(), CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(
+            new Input { Xml = xmlWithCustomSep },
+            new Options(),
+            CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
-        // Non-standard separator # carried through to pipe output
         Assert.That(result.Hl7v2Message, Does.StartWith("MSH#"));
-        // All fields separated by # not |
         Assert.That(result.Hl7v2Message, Does.Not.Contain("MSH|"));
-        // Standard data still intact
         Assert.That(result.Hl7v2Message, Does.Contain("QRY^R02"));
     }
 
@@ -267,13 +273,63 @@ public class FunctionalTests
           </NTE>
         </ADT_A01>";
 
-        var result = Hl7v2.CreateFromXml(new Input { Xml = xmlWithSpecialChars },
-            new Options(), CancellationToken.None);
+        var result = Hl7v2.CreateFromXml(
+            new Input { Xml = xmlWithSpecialChars },
+            new Options(),
+            CancellationToken.None);
 
-        Console.WriteLine(result.Hl7v2Message ?? result.Error?.Message);
         Assert.That(result.Success, Is.True);
-        // Reserved characters must be escaped in pipe output — raw | would break parsing
+
+        Assert.That(result.Hl7v2Message, Does.Contain("\\F\\"));
+        Assert.That(result.Hl7v2Message, Does.Contain("\\S\\"));
+        Assert.That(result.Hl7v2Message, Does.Contain("\\R\\"));
+
         Assert.That(result.Hl7v2Message, Does.Not.Contain("pipe |"));
-        Assert.That(result.Hl7v2Message, Does.Contain("\\F\\").Or.Contain("pipe"));
+        Assert.That(result.Hl7v2Message, Does.Not.Contain("caret ^"));
+        Assert.That(result.Hl7v2Message, Does.Not.Contain("tilde ~"));
+    }
+
+    [Test]
+    public void Should_Overwrite_Single_MSH_Field()
+    {
+        var input = new Input
+        {
+            Xml = xmlMessage,
+            MshOverrides =
+            [
+                new MshOverride { Field = MshField.MSH3_SendingApplication, Value = "NewSender" },
+            ],
+        };
+
+        var result = Hl7v2.CreateFromXml(input, new Options(), CancellationToken.None);
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Hl7v2Message, Does.Contain("NewSender"));
+        Assert.That(result.Hl7v2Message, Does.Contain("COHIE"));
+    }
+
+    [Test]
+    public void Should_Overwrite_Multiple_MSH_Fields_Including_Delimiters()
+    {
+        var input = new Input
+        {
+            Xml = xmlMessage,
+            MshOverrides = new MshOverride[]
+        {
+            new MshOverride { Field = MshField.MSH1_FieldSeparator, Value = "#" },
+            new MshOverride { Field = MshField.MSH3_SendingApplication, Value = "NewSender" },
+            new MshOverride { Field = MshField.MSH5_ReceivingApplication, Value = "NewReceiver" },
+            new MshOverride { Field = MshField.MSH11_ProcessingId, Value = "T" },
+        },
+        };
+
+        var result = Hl7v2.CreateFromXml(input, new Options(), CancellationToken.None);
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Hl7v2Message, Does.StartWith("MSH#"));
+        Assert.That(result.Hl7v2Message, Does.Contain("NewSender"));
+        Assert.That(result.Hl7v2Message, Does.Contain("NewReceiver"));
+        Assert.That(result.Hl7v2Message, Does.Contain("T"));
+        Assert.That(result.Hl7v2Message, Does.Contain("COHIE"));
     }
 }
