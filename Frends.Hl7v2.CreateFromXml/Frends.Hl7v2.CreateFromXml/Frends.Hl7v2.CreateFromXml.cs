@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using Frends.Hl7v2.CreateFromXml.Definitions;
 using Frends.Hl7v2.CreateFromXml.Helpers;
+using NHapi.Base.Model;
 using NHapi.Base.Parser;
+using NHapi.Base.Util;
+using static Frends.Hl7v2.CreateFromXml.Definitions.Enums;
 
 namespace Frends.Hl7v2.CreateFromXml;
 
@@ -37,8 +41,13 @@ public static class Hl7v2
             {
                 LineEnding.CRLF => "\r\n",
                 LineEnding.LF => "\n",
+                LineEnding.CR => "\r",
                 _ => throw new ArgumentOutOfRangeException(nameof(options), "options.LineEnding is not valid."),
             };
+
+            if (input.MshOverrides?.Length > 0)
+                MshHelper.ApplyOverrides(parsedMessage, input.MshOverrides);
+
             var hl7Output = pipeParser.Encode(parsedMessage).ReplaceLineEndings(lineEnding);
 
             cancellationToken.ThrowIfCancellationRequested();
