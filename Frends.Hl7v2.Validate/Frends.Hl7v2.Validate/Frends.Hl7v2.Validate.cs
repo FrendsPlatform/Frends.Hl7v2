@@ -29,12 +29,14 @@ public static class Hl7v2
     {
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (string.IsNullOrEmpty(input.Hl7v2Message))
             {
                 throw new ArgumentNullException(nameof(input), "You must provide an HL7 message.");
             }
 
-            var validationContext = new DefaultValidation();
+            var validationContext = new StrictValidation();
             var parser = new PipeParser
             {
                 ValidationContext = validationContext,
@@ -48,8 +50,6 @@ public static class Hl7v2
             var validator = new MessageValidator(validationContext, false);
             var isValid = validator.Validate(parsed);
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             return new Result
             {
                 Success = true,
@@ -57,7 +57,7 @@ public static class Hl7v2
                 ValidationErrors = isValid ? Array.Empty<string>() : ["Message failed validation rules."],
             };
         }
-        catch (EncodingNotSupportedException ex)
+        catch (NHapi.Base.HL7Exception ex)
         {
             return new Result
             {

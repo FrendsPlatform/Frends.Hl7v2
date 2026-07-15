@@ -1,5 +1,3 @@
-using System;
-using dotenv.net;
 using Frends.Hl7v2.Validate.Definitions;
 
 namespace Frends.Hl7v2.Validate.Tests;

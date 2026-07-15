@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading;
 using Frends.Hl7v2.Validate.Definitions;
@@ -37,6 +38,22 @@ public class FunctionalTests
     {
         var result = Hl7v2.Validate(
             new Input { Hl7v2Message = invalidHl7Message },
+            new Options { ThrowErrorOnFailure = false },
+            CancellationToken.None);
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.IsValid, Is.False);
+    }
+
+    [Test]
+    public void Should_Return_Invalid_For_Negative_SI_Field()
+    {
+        var hl7WithNegativePid1 =
+            "MSH|^~\\&|SendingApp|SendingFac|ReceivingApp|ReceivingFac|20060228155525||ADT^A01|123|P|2.3\r" +
+            "PID|-1||12345^^^MRN||DOE^JOHN||19800101|M\r";
+
+        var result = Hl7v2.Validate(
+            new Input { Hl7v2Message = hl7WithNegativePid1 },
             new Options { ThrowErrorOnFailure = false },
             CancellationToken.None);
 
