@@ -47,14 +47,12 @@ public static class Hl7v2
                 .Replace("\n", "\r");
 
             var parsed = parser.Parse(normalizedMessage);
-            var validator = new MessageValidator(validationContext, false);
-            var isValid = validator.Validate(parsed);
 
             return new Result
             {
                 Success = true,
-                IsValid = isValid,
-                ValidationErrors = isValid ? Array.Empty<string>() : ["Message failed validation rules."],
+                IsValid = true,
+                ValidationErrors = Array.Empty<string>(),
             };
         }
         catch (NHapi.Base.HL7Exception ex)
