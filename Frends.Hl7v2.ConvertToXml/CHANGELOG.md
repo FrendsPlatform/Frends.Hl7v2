@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.0] - 2026-07-24
+
+### Changed
+
+- Updated copyright metadata in the package to comply with Frends packaging standards
+
 ## [1.2.0] - 2026-07-01
 
 ### Added
