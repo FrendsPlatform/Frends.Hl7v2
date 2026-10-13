@@ -2,31 +2,6 @@
 
 Task to create Hl7v2 message from Xml
 
-Cancellation is cooperative through the existing Frends cancellation token.
-It is checked before work starts, during XML reads, child-node traversal and
-segment/field mapping, and between parsing, MSH overrides, encoding and newline
-conversion. Cancellation propagates as `OperationCanceledException`, regardless
-of `ThrowErrorOnFailure`; it is not returned as a normal task error.
-An individual NHapi primitive conversion, model validation, pipe encoding or
-newline-conversion call cannot be interrupted internally. The next checkpoint
-observes cancellation; no background conversion is left running.
-
-Group parsing indexes direct children once using `NextSibling`, avoiding
-NHapi's repeated indexed scans of the XML sibling list. NHapi still provides
-message models, validation, field/component parsing, escaping and pipe encoding.
-Fixed-position segment aliases and surplus non-repeating segments retain NHapi's
-original mapping through a fallback path. Parsers and documents remain
-invocation-local; no mutable parser is shared between task executions.
-
-NHapi 3.2.4 also indexes child lists inside its private field and datatype loops.
-During read-only mapping, the document adapter supplies snapshots built by one
-forward enumeration, giving those loops constant-time `Count` and indexed
-access. This also accelerates the group fallback path. Live DOM behavior is
-retained while loading; NHapi's mapping does not mutate the document.
-Empty and single-child snapshots do not allocate an additional backing list.
-This is a local workaround for the upstream loop issue, not a fork or package
-upgrade. No upstream issue or pull request is created by these changes.
-
 [![CreateFromXml_build](https://github.com/FrendsPlatform/Frends.Hl7v2/actions/workflows/CreateFromXml_test_on_main.yml/badge.svg)](https://github.com/FrendsPlatform/Frends.Hl7v2/actions/workflows/CreateFromXml_test_on_main.yml)
 ![Coverage](https://app-github-custom-badges.azurewebsites.net/Badge?key=FrendsPlatform/Frends.Hl7v2/Frends.Hl7v2.CreateFromXml|main)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
