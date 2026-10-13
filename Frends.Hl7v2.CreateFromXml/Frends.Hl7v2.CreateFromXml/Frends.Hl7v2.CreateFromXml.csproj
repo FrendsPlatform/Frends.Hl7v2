@@ -20,6 +20,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Frends.Hl7v2.CreateFromXml.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="nhapi" Version="3.2.4" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
             <PrivateAssets>all</PrivateAssets>

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using Frends.Hl7v2.CreateFromXml.Definitions;
 using Frends.Hl7v2.CreateFromXml.Helpers;
-using NHapi.Base.Model;
 using NHapi.Base.Parser;
-using NHapi.Base.Util;
-using static Frends.Hl7v2.CreateFromXml.Definitions.Enums;
 
 namespace Frends.Hl7v2.CreateFromXml;
 
@@ -24,17 +20,20 @@ public static class Hl7v2
     /// <param name="options">Additional parameters.</param>
     /// <param name="cancellationToken">A cancellation token provided by Frends Platform.</param>
     /// <returns>object { bool Success, string Hl7v2Message, object Error { string Message, Exception AdditionalInfo } }</returns>
+    /// <exception cref="OperationCanceledException">The supplied cancellation token was cancelled.</exception>
     public static Result CreateFromXml(
         [PropertyTab] Input input,
         [PropertyTab] Options options,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         try
         {
             if (string.IsNullOrEmpty(input.Xml))
                 throw new ArgumentNullException(nameof(input), "You must provide an XML.");
-            var xmlParser = new DefaultXMLParser();
+            var xmlParser = new CancellableXmlParser(cancellationToken);
             var parsedMessage = xmlParser.Parse(input.Xml);
+            cancellationToken.ThrowIfCancellationRequested();
 
             var pipeParser = new PipeParser();
             var lineEnding = options.LineEnding switch
@@ -48,7 +47,10 @@ public static class Hl7v2
             if (input.MshOverrides?.Length > 0)
                 MshHelper.ApplyOverrides(parsedMessage, input.MshOverrides);
 
-            var hl7Output = pipeParser.Encode(parsedMessage).ReplaceLineEndings(lineEnding);
+            cancellationToken.ThrowIfCancellationRequested();
+            var hl7Output = pipeParser.Encode(parsedMessage);
+            cancellationToken.ThrowIfCancellationRequested();
+            hl7Output = hl7Output.ReplaceLineEndings(lineEnding);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -60,6 +62,7 @@ public static class Hl7v2
         }
         catch (Exception ex)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return ErrorHandler.Handle(ex, options.ThrowErrorOnFailure, options.ErrorMessageOnFailure);
         }
     }

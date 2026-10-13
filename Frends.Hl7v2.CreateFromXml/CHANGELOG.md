@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Check cancellation during XML reading and traversal, between segments and fields,
+  and between conversion stages. Propagate cancellation independently of error-handling options.
+
 ## [1.2.0] - 2026-08-06
 
 ### Changed
