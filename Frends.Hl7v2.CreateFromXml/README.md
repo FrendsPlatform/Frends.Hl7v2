@@ -11,6 +11,13 @@ An individual NHapi primitive conversion, model validation, pipe encoding or
 newline-conversion call cannot be interrupted internally. The next checkpoint
 observes cancellation; no background conversion is left running.
 
+Group parsing indexes direct children once using `NextSibling`, avoiding
+NHapi's repeated indexed scans of the XML sibling list. NHapi still provides
+message models, validation, field/component parsing, escaping and pipe encoding.
+Fixed-position segment aliases and surplus non-repeating segments retain NHapi's
+original mapping through a fallback path. Parsers and documents remain
+invocation-local; no mutable parser is shared between task executions.
+
 [![CreateFromXml_build](https://github.com/FrendsPlatform/Frends.Hl7v2/actions/workflows/CreateFromXml_test_on_main.yml/badge.svg)](https://github.com/FrendsPlatform/Frends.Hl7v2/actions/workflows/CreateFromXml_test_on_main.yml)
 ![Coverage](https://app-github-custom-badges.azurewebsites.net/Badge?key=FrendsPlatform/Frends.Hl7v2/Frends.Hl7v2.CreateFromXml|main)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)

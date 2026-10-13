@@ -6,6 +6,8 @@
 
 - Check cancellation during XML reading and traversal, between segments and fields,
   and between conversion stages. Propagate cancellation independently of error-handling options.
+- Index XML group children in one forward pass to avoid quadratic repeated-group
+  scans, while retaining NHapi field parsing and special segment-alias handling.
 
 ## [1.2.0] - 2026-08-06
 
