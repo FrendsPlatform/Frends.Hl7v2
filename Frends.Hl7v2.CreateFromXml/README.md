@@ -26,38 +26,6 @@ Run the tests
 
 `dotnet test`
 
-### Run large-message benchmarks
-
-The explicit `LargeMessageBenchmarks` fixture is excluded from normal test runs.
-Run it from this solution directory in Release mode:
-
-```powershell
-$env:HL7_BENCHMARK_STAGE = "01 - Baseline"
-$env:HL7_BENCHMARK_REVISION = git rev-parse --short HEAD
-dotnet test .\Frends.Hl7v2.CreateFromXml.Tests\Frends.Hl7v2.CreateFromXml.Tests.csproj -c Release --filter "FullyQualifiedName~LargeMessageBenchmarks"
-```
-
-Each run appends a timestamped table to `TestResultFile.md` in this directory
-(ignored by Git). Change the stage label when comparing implementations.
-`HL7_BENCHMARK_RESULTS` can override the output path;
-`HL7_BENCHMARK_ITERATIONS` controls the sample count (default: 3).
-
-The synthetic workloads distinguish byte size from sibling count: 1,000–8,000
-observation groups under one parent, observations spread across orders, 1/10 MiB
-single-field values, and 1,000–8,000 repetitions of one field. The tests verify
-the entire output against stock NHapi and independently generated expected ER7.
-They report median task time/managed allocations and separate diagnostic DOM,
-stock XML parse, pipe encode and newline-conversion timings. Input generation
-and assertions are not timed. Allocations are not peak memory measurements.
-There are no machine-dependent timing assertions; use the same machine,
-configuration and sample count for comparisons. Cold-start costs are excluded.
-The stock-parser comparisons can take several minutes on slower machines.
-
-The final implementation also includes an explicit 64,000-sibling stress
-benchmark (over 10 MiB under one order). It checks the complete expected output
-without running the known-slow stock parser at that size. Its supplemental
-report is not a baseline speedup comparison.
-
 ### Create a NuGet package
 
 `dotnet pack --configuration Release`
