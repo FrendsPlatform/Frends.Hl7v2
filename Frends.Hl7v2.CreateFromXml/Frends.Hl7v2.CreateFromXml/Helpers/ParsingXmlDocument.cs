@@ -7,6 +7,7 @@ namespace Frends.Hl7v2.CreateFromXml.Helpers;
 internal sealed class ParsingXmlDocument : XmlDocument
 {
     private readonly CancellationToken cancellationToken;
+    private bool indexedTraversal;
 
     internal ParsingXmlDocument(CancellationToken cancellationToken)
     {
@@ -23,6 +24,12 @@ internal sealed class ParsingXmlDocument : XmlDocument
         return new ParsingXmlElement(prefix, localName, namespaceUri, this, cancellationToken);
     }
 
+    internal void EnableIndexedTraversal()
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        indexedTraversal = true;
+    }
+
     private sealed class ParsingXmlElement : XmlElement
     {
         private readonly CancellationToken cancellationToken;
@@ -31,7 +38,7 @@ internal sealed class ParsingXmlDocument : XmlDocument
             string prefix,
             string localName,
             string namespaceUri,
-            XmlDocument document,
+            ParsingXmlDocument document,
             CancellationToken cancellationToken)
             : base(prefix, localName, namespaceUri, document)
         {
@@ -40,10 +47,13 @@ internal sealed class ParsingXmlDocument : XmlDocument
 
         /// <inheritdoc />
         /// <summary>
-        /// Gets a cancellable view used by NHapi's internal traversal loops.
+        /// Gets a cancellable child view, indexed during the read-only parsing phase.
         /// </summary>
         /// <example>A list containing the field elements of a segment.</example>
-        public override XmlNodeList ChildNodes => new CancellableNodeList(base.ChildNodes, cancellationToken);
+        public override XmlNodeList ChildNodes =>
+            ((ParsingXmlDocument)OwnerDocument).indexedTraversal
+                ? new IndexedXmlNodeList(base.ChildNodes, cancellationToken)
+                : new CancellableNodeList(base.ChildNodes, cancellationToken);
     }
 
     private sealed class CancellableNodeList : XmlNodeList

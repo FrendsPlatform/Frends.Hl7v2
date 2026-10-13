@@ -18,6 +18,15 @@ Fixed-position segment aliases and surplus non-repeating segments retain NHapi's
 original mapping through a fallback path. Parsers and documents remain
 invocation-local; no mutable parser is shared between task executions.
 
+NHapi 3.2.4 also indexes child lists inside its private field and datatype loops.
+During read-only mapping, the document adapter supplies snapshots built by one
+forward enumeration, giving those loops constant-time `Count` and indexed
+access. This also accelerates the group fallback path. Live DOM behavior is
+retained while loading; NHapi's mapping does not mutate the document.
+Empty and single-child snapshots do not allocate an additional backing list.
+This is a local workaround for the upstream loop issue, not a fork or package
+upgrade. No upstream issue or pull request is created by these changes.
+
 [![CreateFromXml_build](https://github.com/FrendsPlatform/Frends.Hl7v2/actions/workflows/CreateFromXml_test_on_main.yml/badge.svg)](https://github.com/FrendsPlatform/Frends.Hl7v2/actions/workflows/CreateFromXml_test_on_main.yml)
 ![Coverage](https://app-github-custom-badges.azurewebsites.net/Badge?key=FrendsPlatform/Frends.Hl7v2/Frends.Hl7v2.CreateFromXml|main)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -68,6 +77,11 @@ and assertions are not timed. Allocations are not peak memory measurements.
 There are no machine-dependent timing assertions; use the same machine,
 configuration and sample count for comparisons. Cold-start costs are excluded.
 The stock-parser comparisons can take several minutes on slower machines.
+
+The final implementation also includes an explicit 64,000-sibling stress
+benchmark (over 10 MiB under one order). It checks the complete expected output
+without running the known-slow stock parser at that size. Its supplemental
+report is not a baseline speedup comparison.
 
 ### Create a NuGet package
 

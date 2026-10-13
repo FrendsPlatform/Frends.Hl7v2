@@ -26,6 +26,11 @@ internal class CancellableXmlParser : DefaultXMLParser
     {
         ArgumentNullException.ThrowIfNull(xmlMessage);
         cancellationToken.ThrowIfCancellationRequested();
+
+        // NHapi only reads the DOM while mapping it; retain live child lists during loading.
+        if (xmlMessage is ParsingXmlDocument document)
+            document.EnableIndexedTraversal();
+
         parserOptions ??= DefaultParserOptions;
         var root = xmlMessage.DocumentElement;
         AssertNamespaceUri(root.NamespaceURI);

@@ -83,31 +83,48 @@ public class LargeMessageBenchmarks
             var newlineMs = Measure(() => encoded.ReplaceLineEndings("\n"), out var referenceOutput);
             Assert.That(Hash(referenceOutput), Is.EqualTo(expectedHash), $"Stock parser: {name}");
 
-            var elapsed = new List<double>();
-            var allocated = new List<double>();
-            var input = new Input { Xml = message.Xml };
-            var options = new Options();
-            for (var iteration = 0; iteration < iterations; iteration++)
-            {
-                var before = GC.GetAllocatedBytesForCurrentThread();
-                var milliseconds = Measure(
-                    () => Hl7v2.CreateFromXml(input, options, CancellationToken.None),
-                    out var result);
-                var bytes = GC.GetAllocatedBytesForCurrentThread() - before;
-                elapsed.Add(milliseconds);
-                allocated.Add(bytes / (1024.0 * 1024.0));
-                Assert.That(result.Success, Is.True, name);
-                Assert.That(Hash(result.Hl7v2Message), Is.EqualTo(expectedHash), $"{name}, sample {iteration + 1}");
-            }
+            var (elapsed, allocated) = MeasureTask(message, iterations, name);
 
             var row = FormattableString.Invariant(
-                $"| {name} | {Encoding.UTF8.GetByteCount(message.Xml) / 1024.0:F1} | {Median(elapsed):F2} | {Median(allocated):F2} | {domMs:F2} | {parseMs:F2} | {encodeMs:F2} | {newlineMs:F2} |");
+                $"| {name} | {Encoding.UTF8.GetByteCount(message.Xml) / 1024.0:F1} | {elapsed:F2} | {allocated:F2} | {domMs:F2} | {parseMs:F2} | {encodeMs:F2} | {newlineMs:F2} |");
             File.AppendAllText(reportPath, row + "\n");
             TestContext.Progress.WriteLine(row);
         }
 
         File.AppendAllText(reportPath, "\nCompleted: all output checks passed.\n\n");
         TestContext.Progress.WriteLine($"Results appended to {reportPath}");
+    }
+
+    [Test]
+    public void Measure_Large_Sibling_Stress()
+    {
+#if DEBUG
+        Assert.Fail("Benchmarks must be run with --configuration Release.");
+#endif
+        var iterations = int.Parse(
+            Environment.GetEnvironmentVariable("HL7_BENCHMARK_ITERATIONS") ?? "3",
+            CultureInfo.InvariantCulture);
+        Assert.That(iterations, Is.InRange(1, 20));
+        var reportPath = Environment.GetEnvironmentVariable("HL7_BENCHMARK_RESULTS")
+            ?? Path.Combine(FindSolutionDirectory(), "TestResultFile.md");
+        var stage = Environment.GetEnvironmentVariable("HL7_BENCHMARK_STAGE") ?? "Unlabelled run";
+        var revision = Environment.GetEnvironmentVariable("HL7_BENCHMARK_REVISION") ?? "Not supplied";
+
+        WarmUp();
+        var message = SyntheticHl7Message.Create(1, 64000);
+        var (elapsed, allocated) = MeasureTask(message, iterations, "64,000 sibling groups");
+        var section = $"\n## Supplemental stress — {stage} — {DateTimeOffset.UtcNow:O}\n\n" +
+            $"Base revision: `{revision}`; Release; median of {iterations} warmed-up samples.\n\n" +
+            "This additional final-stage case puts all 64,000 observations under one order. " +
+            "Only the task is timed: the stock parser is deliberately not run at this scale " +
+            "to avoid the known quadratic stall. Complete output is checked against the " +
+            "independently generated expected message. There is no baseline measurement for this case.\n\n" +
+            "| Case | XML KiB (UTF-8) | Task median ms | Task allocated MiB |\n" +
+            "|---|---:|---:|---:|\n" +
+            FormattableString.Invariant($"| Sibling groups: 64000 | {Encoding.UTF8.GetByteCount(message.Xml) / 1024.0:F1} | {elapsed:F2} | {allocated:F2} |\n\n") +
+            "Completed: all output checks passed.\n\n";
+        File.AppendAllText(reportPath, section);
+        TestContext.Progress.WriteLine(section);
     }
 
     private static IEnumerable<(string Name, Func<SyntheticHl7Message> Create)> Cases()
@@ -133,6 +150,32 @@ public class LargeMessageBenchmarks
             var result = Hl7v2.CreateFromXml(new Input { Xml = message.Xml }, new Options(), CancellationToken.None);
             Assert.That(result.Hl7v2Message, Is.EqualTo(message.ExpectedEr7));
         }
+    }
+
+    private static (double Milliseconds, double AllocatedMiB) MeasureTask(
+        SyntheticHl7Message message,
+        int iterations,
+        string name)
+    {
+        var expectedHash = Hash(message.ExpectedEr7);
+        var elapsed = new List<double>();
+        var allocated = new List<double>();
+        var input = new Input { Xml = message.Xml };
+        var options = new Options();
+        for (var iteration = 0; iteration < iterations; iteration++)
+        {
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            var milliseconds = Measure(
+                () => Hl7v2.CreateFromXml(input, options, CancellationToken.None),
+                out var result);
+            var bytes = GC.GetAllocatedBytesForCurrentThread() - before;
+            elapsed.Add(milliseconds);
+            allocated.Add(bytes / (1024.0 * 1024.0));
+            Assert.That(result.Success, Is.True, name);
+            Assert.That(Hash(result.Hl7v2Message), Is.EqualTo(expectedHash), $"{name}, sample {iteration + 1}");
+        }
+
+        return (Median(elapsed), Median(allocated));
     }
 
     private static double Measure<T>(Func<T> action, out T result)
