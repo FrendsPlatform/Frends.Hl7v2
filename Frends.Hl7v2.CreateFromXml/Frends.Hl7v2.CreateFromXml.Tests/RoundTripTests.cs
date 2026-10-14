@@ -31,7 +31,7 @@ public class RoundTripTests
         CreateLineEnding createEnding,
         ConvertLineEnding convertEnding)
     {
-        var created = CreateFromXml.Hl7v2.CreateFromXml(
+        var created = Hl7v2.CreateFromXml(
             new CreateInput { Xml = xml },
             new CreateOptions { LineEnding = createEnding, ThrowErrorOnFailure = false },
             CancellationToken.None);
