@@ -69,7 +69,8 @@ public class StockParserEquivalenceTests
 
         var ours = AssertEquivalentAndLossless(pipe);
 
-        Assert.That(ours,
+        Assert.That(
+            ours,
             Does.Contain("<a href=\"x\">Tom \\T\\ Jerry's</a> \u0105\u0119\u0142\u00f3\u017c\u017a\u0107"));
     }
 
@@ -109,7 +110,7 @@ public class StockParserEquivalenceTests
             new Options
             {
                 LineEnding = LineEnding.CR,
-                ThrowErrorOnFailure = false
+                ThrowErrorOnFailure = false,
             },
             CancellationToken.None);
 
