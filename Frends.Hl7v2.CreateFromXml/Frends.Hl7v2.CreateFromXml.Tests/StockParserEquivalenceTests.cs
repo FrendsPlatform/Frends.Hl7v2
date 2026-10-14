@@ -69,7 +69,8 @@ public class StockParserEquivalenceTests
 
         var ours = AssertEquivalentAndLossless(pipe);
 
-        Assert.That(ours, Does.Contain("<a href=\"x\">Tom \\T\\ Jerry's</a> \u0105\u0119\u0142\u00f3\u017c\u017a\u0107"));
+        Assert.That(ours,
+            Does.Contain("<a href=\"x\">Tom \\T\\ Jerry's</a> \u0105\u0119\u0142\u00f3\u017c\u017a\u0107"));
     }
 
     [TestCase(2000, 5)]
@@ -105,7 +106,11 @@ public class StockParserEquivalenceTests
 
         var result = Hl7v2.CreateFromXml(
             new Input { Xml = xml },
-            new Options { LineEnding = LineEnding.CR, ThrowErrorOnFailure = false },
+            new Options
+            {
+                LineEnding = LineEnding.CR,
+                ThrowErrorOnFailure = false
+            },
             CancellationToken.None);
 
         Assert.That(result.Success, Is.True, result.Error?.Message);
@@ -116,5 +121,3 @@ public class StockParserEquivalenceTests
         return result.Hl7v2Message;
     }
 }
-
-
