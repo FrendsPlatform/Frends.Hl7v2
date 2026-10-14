@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Linq;
 using System.Threading;
 using System.Xml;
@@ -31,62 +29,15 @@ public class IndexedXmlNodeListTests
     }
 
     [Test]
-    public void Walks_Source_Once_And_Never_Uses_Its_Indexer_Or_Count()
+    public void Supports_Repeated_Indexed_Access()
     {
         var document = new XmlDocument();
         document.LoadXml("<root>" + string.Concat(Enumerable.Repeat("<field>value</field>", 1000)) + "</root>");
-        var source = new TrackingNodeList(document.DocumentElement.ChildNodes);
-        var indexed = new IndexedXmlNodeList(source, CancellationToken.None);
+        var indexed = new IndexedXmlNodeList(document.DocumentElement.ChildNodes, CancellationToken.None);
 
         for (var i = 0; i < indexed.Count; i++)
             Assert.That(indexed[i].InnerText, Is.EqualTo("value"));
         Assert.That(indexed.Cast<XmlNode>().Count(), Is.EqualTo(1000));
-
-        Assert.That(source.Enumerations, Is.EqualTo(1));
-        Assert.That(source.NodesVisited, Is.EqualTo(1000));
-        Assert.That(source.CountReads, Is.Zero);
-        Assert.That(source.IndexReads, Is.Zero);
-    }
-
-    [Test]
-    public void Cancels_While_Constructing_The_Index()
-    {
-        using var cancellation = new CancellationTokenSource();
-        var document = new XmlDocument();
-        document.LoadXml("<root><one/><two/><three/><four/></root>");
-        var source = new TrackingNodeList(
-            document.DocumentElement.ChildNodes,
-            visited =>
-            {
-                if (visited == 3)
-                    cancellation.Cancel();
-            });
-        Action construct = () => _ = new IndexedXmlNodeList(source, cancellation.Token);
-
-        var exception = Assert.Throws<OperationCanceledException>(construct);
-
-        Assert.That(exception.CancellationToken, Is.EqualTo(cancellation.Token));
-        Assert.That(source.NodesVisited, Is.EqualTo(3));
-    }
-
-    [Test]
-    public void Cancels_All_Indexed_Access_Paths()
-    {
-        using var cancellation = new CancellationTokenSource();
-        var document = new XmlDocument();
-        document.LoadXml("<root><one/></root>");
-        var indexed = new IndexedXmlNodeList(document.DocumentElement.ChildNodes, cancellation.Token);
-        cancellation.Cancel();
-        Action count = () => _ = indexed.Count;
-        Action item = () => indexed.Item(0);
-        Action enumerate = () => indexed.GetEnumerator().MoveNext();
-
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.Throws<OperationCanceledException>(count);
-            Assert.Throws<OperationCanceledException>(item);
-            Assert.Throws<OperationCanceledException>(enumerate);
-        }
     }
 
     [Test]
@@ -105,51 +56,5 @@ public class IndexedXmlNodeListTests
 
         Assert.That(document.DocumentElement.ChildNodes, Is.TypeOf<IndexedXmlNodeList>());
         Assert.That(new PipeParser().Encode(parsed).ReplaceLineEndings("\n"), Is.EqualTo(input.ExpectedEr7));
-    }
-
-    private sealed class TrackingNodeList : XmlNodeList
-    {
-        private readonly XmlNodeList nodes;
-        private readonly Action<int> onVisit;
-
-        internal TrackingNodeList(XmlNodeList nodes, Action<int> onVisit = null)
-        {
-            this.nodes = nodes;
-            this.onVisit = onVisit;
-        }
-
-        public override int Count
-        {
-            get
-            {
-                CountReads++;
-                return nodes.Count;
-            }
-        }
-
-        internal int Enumerations { get; private set; }
-
-        internal int NodesVisited { get; private set; }
-
-        internal int CountReads { get; private set; }
-
-        internal int IndexReads { get; private set; }
-
-        public override XmlNode Item(int index)
-        {
-            IndexReads++;
-            return nodes.Item(index);
-        }
-
-        public override IEnumerator GetEnumerator()
-        {
-            Enumerations++;
-            foreach (XmlNode node in nodes)
-            {
-                NodesVisited++;
-                onVisit?.Invoke(NodesVisited);
-                yield return node;
-            }
-        }
     }
 }

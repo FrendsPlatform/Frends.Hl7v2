@@ -26,22 +26,6 @@ public class GroupTraversalTests
         Assert.That(document.IndexedGroupAccesses, Is.Zero);
     }
 
-    [Test]
-    public void Cancels_While_Indexing_Sibling_Groups()
-    {
-        using var source = new CancellationTokenSource();
-        var document = new CountingXmlDocument(source);
-        document.LoadXml(SyntheticHl7Message.Create(1, 128).Xml);
-        document.TrackAccesses = true;
-        var parser = new CancellableXmlParser(source.Token);
-        Action parse = () => parser.ParseDocument(document, "2.5", new ParserOptions());
-
-        var exception = Assert.Throws<OperationCanceledException>(parse);
-
-        Assert.That(exception.CancellationToken, Is.EqualTo(source.Token));
-        Assert.That(document.ObservationLinksFollowed, Is.EqualTo(10));
-    }
-
     private sealed class CountingXmlDocument : XmlDocument
     {
         private readonly CancellationTokenSource source;

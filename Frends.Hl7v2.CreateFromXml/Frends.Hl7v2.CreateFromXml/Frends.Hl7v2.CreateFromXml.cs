@@ -48,11 +48,7 @@ public static class Hl7v2
                 MshHelper.ApplyOverrides(parsedMessage, input.MshOverrides);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var hl7Output = pipeParser.Encode(parsedMessage);
-            cancellationToken.ThrowIfCancellationRequested();
-            hl7Output = hl7Output.ReplaceLineEndings(lineEnding);
-
-            cancellationToken.ThrowIfCancellationRequested();
+            var hl7Output = pipeParser.Encode(parsedMessage).ReplaceLineEndings(lineEnding);
 
             return new Result
             {
@@ -62,8 +58,7 @@ public static class Hl7v2
         }
         catch (Exception ex)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            return ErrorHandler.Handle(ex, options.ThrowErrorOnFailure, options.ErrorMessageOnFailure);
+            return ex.Handle(options);
         }
     }
 }

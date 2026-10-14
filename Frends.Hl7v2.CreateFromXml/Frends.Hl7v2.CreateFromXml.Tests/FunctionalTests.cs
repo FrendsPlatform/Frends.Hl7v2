@@ -4,7 +4,6 @@ using System.Threading;
 using Frends.Hl7v2.CreateFromXml.Definitions;
 using NHapi.Base.Parser;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using static Frends.Hl7v2.CreateFromXml.Definitions.Enums;
 
 namespace Frends.Hl7v2.CreateFromXml.Tests;

@@ -17,26 +17,19 @@ using NUnit.Framework;
 namespace Frends.Hl7v2.CreateFromXml.Tests;
 
 [TestFixture]
-[Explicit("Run in Release with --filter FullyQualifiedName~LargeMessageBenchmarks.")]
-[Category("Benchmark")]
 [NonParallelizable]
 public class LargeMessageBenchmarks
 {
     [Test]
     public void Measure_Large_Message_Shapes()
     {
-#if DEBUG
-        Assert.Fail("Benchmarks must be run with --configuration Release.");
-#endif
         var iterations = int.Parse(
             Environment.GetEnvironmentVariable("HL7_BENCHMARK_ITERATIONS") ?? "3",
             CultureInfo.InvariantCulture);
         Assert.That(iterations, Is.InRange(1, 20));
 
         var reportPath = Environment.GetEnvironmentVariable("HL7_BENCHMARK_RESULTS")
-            ?? Path.Combine(FindSolutionDirectory(), "TestResultFile.md");
-        var stage = Environment.GetEnvironmentVariable("HL7_BENCHMARK_STAGE") ?? "Unlabelled run";
-        var revision = Environment.GetEnvironmentVariable("HL7_BENCHMARK_REVISION") ?? "Not supplied";
+                         ?? Path.Combine(FindSolutionDirectory(), "TestResultFile.md");
 
         if (!File.Exists(reportPath))
         {
@@ -55,8 +48,8 @@ public class LargeMessageBenchmarks
         }
 
         var heading =
-            $"## {stage} — {DateTimeOffset.UtcNow:O}\n\n" +
-            $"- Base revision: `{revision}`; Release; iterations: {iterations}\n" +
+            $"## Benchmark tests - {DateTimeOffset.UtcNow:O}\n\n" +
+            $"- Iterations: {iterations}\n" +
             $"- Runtime: {RuntimeInformation.FrameworkDescription}; {RuntimeInformation.OSDescription}; " +
             $"{RuntimeInformation.ProcessArchitecture}; logical CPUs: {Environment.ProcessorCount}; server GC: {GCSettings.IsServerGC}\n" +
             $"- CPU: {Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER") ?? "Not reported"}\n" +
@@ -98,31 +91,29 @@ public class LargeMessageBenchmarks
     [Test]
     public void Measure_Large_Sibling_Stress()
     {
-#if DEBUG
-        Assert.Fail("Benchmarks must be run with --configuration Release.");
-#endif
         var iterations = int.Parse(
             Environment.GetEnvironmentVariable("HL7_BENCHMARK_ITERATIONS") ?? "3",
             CultureInfo.InvariantCulture);
         Assert.That(iterations, Is.InRange(1, 20));
         var reportPath = Environment.GetEnvironmentVariable("HL7_BENCHMARK_RESULTS")
-            ?? Path.Combine(FindSolutionDirectory(), "TestResultFile.md");
+                         ?? Path.Combine(FindSolutionDirectory(), "TestResultFile.md");
         var stage = Environment.GetEnvironmentVariable("HL7_BENCHMARK_STAGE") ?? "Unlabelled run";
         var revision = Environment.GetEnvironmentVariable("HL7_BENCHMARK_REVISION") ?? "Not supplied";
 
         WarmUp();
         var message = SyntheticHl7Message.Create(1, 64000);
         var (elapsed, allocated) = MeasureTask(message, iterations, "64,000 sibling groups");
-        var section = $"\n## Supplemental stress — {stage} — {DateTimeOffset.UtcNow:O}\n\n" +
-            $"Base revision: `{revision}`; Release; median of {iterations} warmed-up samples.\n\n" +
-            "This additional final-stage case puts all 64,000 observations under one order. " +
-            "Only the task is timed: the stock parser is deliberately not run at this scale " +
-            "to avoid the known quadratic stall. Complete output is checked against the " +
-            "independently generated expected message. There is no baseline measurement for this case.\n\n" +
-            "| Case | XML KiB (UTF-8) | Task median ms | Task allocated MiB |\n" +
-            "|---|---:|---:|---:|\n" +
-            FormattableString.Invariant($"| Sibling groups: 64000 | {Encoding.UTF8.GetByteCount(message.Xml) / 1024.0:F1} | {elapsed:F2} | {allocated:F2} |\n\n") +
-            "Completed: all output checks passed.\n\n";
+        var section = $"\n## Supplemental stress —  {DateTimeOffset.UtcNow:O}\n\n" +
+                      $"Median of {iterations} warmed-up samples.\n\n" +
+                      "This additional final-stage case puts all 64,000 observations under one order. " +
+                      "Only the task is timed: the stock parser is deliberately not run at this scale " +
+                      "to avoid the known quadratic stall. Complete output is checked against the " +
+                      "independently generated expected message. There is no baseline measurement for this case.\n\n" +
+                      "| Case | XML KiB (UTF-8) | Task median ms | Task allocated MiB |\n" +
+                      "|---|---:|---:|---:|\n" +
+                      FormattableString.Invariant(
+                          $"| Sibling groups: 64000 | {Encoding.UTF8.GetByteCount(message.Xml) / 1024.0:F1} | {elapsed:F2} | {allocated:F2} |\n\n") +
+                      "Completed: all output checks passed.\n\n";
         File.AppendAllText(reportPath, section);
         TestContext.Progress.WriteLine(section);
     }

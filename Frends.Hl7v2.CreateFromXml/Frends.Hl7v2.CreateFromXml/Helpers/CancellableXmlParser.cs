@@ -76,7 +76,7 @@ internal class CancellableXmlParser : DefaultXMLParser
         try
         {
             var document = new ParsingXmlDocument(cancellationToken);
-            using var reader = new CancellableStringReader(message, cancellationToken);
+            using var reader = new StringReader(message);
             document.Load(reader);
             cancellationToken.ThrowIfCancellationRequested();
             return ParseDocument(document, version, parserOptions);

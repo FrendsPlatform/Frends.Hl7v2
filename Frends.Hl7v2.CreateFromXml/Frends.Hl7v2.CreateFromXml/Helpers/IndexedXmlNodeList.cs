@@ -25,11 +25,9 @@ internal sealed class IndexedXmlNodeList : XmlNodeList
             }
 
             // Most datatype elements contain one text node; avoid allocating a list for them.
-            nodes ??= new List<XmlNode> { firstNode };
+            nodes ??= [firstNode];
             nodes.Add(node);
         }
-
-        cancellationToken.ThrowIfCancellationRequested();
     }
 
     /// <inheritdoc />
@@ -78,7 +76,5 @@ internal sealed class IndexedXmlNodeList : XmlNodeList
                 yield return node;
             }
         }
-
-        cancellationToken.ThrowIfCancellationRequested();
     }
 }
