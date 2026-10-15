@@ -18,6 +18,7 @@ namespace Frends.Hl7v2.CreateFromXml.Tests;
 
 [TestFixture]
 [NonParallelizable]
+[Explicit("Performance benchmark; run manually.")]
 public class LargeMessageBenchmarks
 {
     [Test]
@@ -42,8 +43,7 @@ public class LargeMessageBenchmarks
                 "The separate stock-NHapi timings are single diagnostic samples on the same input. " +
                 "Stock parse includes DOM loading and validation; do not add the DOM column to it. " +
                 "The stock parser remains unchanged in every stage. Task output is checked against both " +
-                "stock NHapi and an independently constructed expected message using SHA-256.\n" +
-                "The revision identifies the base commit; the labelled stage includes its uncommitted changes.\n\n";
+                "stock NHapi and an independently constructed expected message using SHA-256.\n\n";
             File.AppendAllText(reportPath, introduction);
         }
 
@@ -97,9 +97,6 @@ public class LargeMessageBenchmarks
         Assert.That(iterations, Is.InRange(1, 20));
         var reportPath = Environment.GetEnvironmentVariable("HL7_BENCHMARK_RESULTS")
                          ?? Path.Combine(FindSolutionDirectory(), "TestResultFile.md");
-        var stage = Environment.GetEnvironmentVariable("HL7_BENCHMARK_STAGE") ?? "Unlabelled run";
-        var revision = Environment.GetEnvironmentVariable("HL7_BENCHMARK_REVISION") ?? "Not supplied";
-
         WarmUp();
         var message = SyntheticHl7Message.Create(1, 64000);
         var (elapsed, allocated) = MeasureTask(message, iterations, "64,000 sibling groups");
