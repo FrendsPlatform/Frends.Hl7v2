@@ -7,7 +7,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Frends.Hl7v2.ConvertToXml\Frends.Hl7v2.ConvertToXml.csproj"/>
-    </ItemGroup>
+                <ProjectReference Include="..\..\Frends.Hl7v2.CreateFromXml\Frends.Hl7v2.CreateFromXml\Frends.Hl7v2.CreateFromXml.csproj"/>
+                <ProjectReference Include="..\..\Frends.Hl7v2.Validate\Frends.Hl7v2.Validate\Frends.Hl7v2.Validate.csproj"/>    </ItemGroup>
 
     <ItemGroup>
         <None Include=".env" CopyToOutputDirectory="PreserveNewest" Condition="Exists('.env')"/>
