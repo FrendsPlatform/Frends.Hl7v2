@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using Frends.Hl7v2.CreateFromXml.Definitions;
+using Frends.Hl7v2.CreateFromXml.Helpers;
+using NHapi.Base.Model;
 using NHapi.Base.Parser;
 using NUnit.Framework;
 
@@ -18,7 +20,6 @@ namespace Frends.Hl7v2.CreateFromXml.Tests;
 
 [TestFixture]
 [NonParallelizable]
-[Explicit("Performance benchmark; run manually.")]
 public class LargeMessageBenchmarks
 {
     [Test]
@@ -113,6 +114,64 @@ public class LargeMessageBenchmarks
                       "Completed: all output checks passed.\n\n";
         File.AppendAllText(reportPath, section);
         TestContext.Progress.WriteLine(section);
+    }
+
+    [TestCase("8,000 sibling groups", 1, 8000, 1)]
+    [TestCase("8,000 repeated fields", 1, 1, 8000)]
+    public void Indexed_Parser_Is_Faster_Than_Stock_Parser_For_Large_Inputs(
+        string name,
+        int orders,
+        int observationsPerOrder,
+        int fieldRepetitions)
+    {
+        const int iterations = 5;
+        var message = SyntheticHl7Message.Create(orders, observationsPerOrder, fieldRepetitions);
+        var stockParser = new DefaultXMLParser();
+        var indexedParser = new CancellableXmlParser(CancellationToken.None);
+        IMessage stockMessage = null;
+        IMessage indexedMessage = null;
+
+        for (var i = 0; i < 3; i++)
+        {
+            stockMessage = stockParser.Parse(message.Xml);
+            indexedMessage = indexedParser.Parse(message.Xml);
+        }
+
+        var pipeParser = new PipeParser();
+        Assert.That(
+            pipeParser.Encode(stockMessage).ReplaceLineEndings("\n"),
+            Is.EqualTo(message.ExpectedEr7),
+            $"{name}: stock parser output");
+        Assert.That(
+            pipeParser.Encode(indexedMessage).ReplaceLineEndings("\n"),
+            Is.EqualTo(message.ExpectedEr7),
+            $"{name}: indexed parser output");
+
+        var stockTimes = new List<double>(iterations);
+        var indexedTimes = new List<double>(iterations);
+        for (var i = 0; i < iterations; i++)
+        {
+            if (i % 2 == 0)
+            {
+                stockTimes.Add(Measure(() => stockParser.Parse(message.Xml), out _));
+                indexedTimes.Add(Measure(() => indexedParser.Parse(message.Xml), out _));
+            }
+            else
+            {
+                indexedTimes.Add(Measure(() => indexedParser.Parse(message.Xml), out _));
+                stockTimes.Add(Measure(() => stockParser.Parse(message.Xml), out _));
+            }
+        }
+
+        var stockMedian = Median(stockTimes);
+        var indexedMedian = Median(indexedTimes);
+        TestContext.Progress.WriteLine(
+            FormattableString.Invariant(
+                $"{name}: stock DefaultXMLParser median {stockMedian:F2} ms; indexed parser median {indexedMedian:F2} ms."));
+        Assert.That(
+            indexedMedian,
+            Is.LessThan(stockMedian),
+            $"{name}: indexed parser should be faster than the stock DefaultXMLParser.");
     }
 
     private static IEnumerable<(string Name, Func<SyntheticHl7Message> Create)> Cases()
