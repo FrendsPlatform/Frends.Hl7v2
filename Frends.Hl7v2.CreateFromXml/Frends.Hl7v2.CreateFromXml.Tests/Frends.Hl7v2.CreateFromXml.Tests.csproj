@@ -7,6 +7,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Frends.Hl7v2.CreateFromXml\Frends.Hl7v2.CreateFromXml.csproj"/>
+        <ProjectReference Include="..\..\Frends.Hl7v2.Validate\Frends.Hl7v2.Validate\Frends.Hl7v2.Validate.csproj"/>
+        <ProjectReference Include="..\..\Frends.Hl7v2.ConvertToXml\Frends.Hl7v2.ConvertToXml\Frends.Hl7v2.ConvertToXml.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

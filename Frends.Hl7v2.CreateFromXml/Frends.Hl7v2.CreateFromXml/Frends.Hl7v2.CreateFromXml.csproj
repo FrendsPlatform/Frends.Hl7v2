@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <LangVersion>latest</LangVersion>
-        <Version>1.2.0</Version>
+        <Version>1.3.0</Version>
         <Authors>Frends</Authors>
         <Copyright>Frends</Copyright>
         <Company>Frends</Company>
@@ -18,6 +18,10 @@
             CS1591, <!-- StyleCop SA1602 already enforces documentation for enum members -->
         </NoWarn>
     </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Frends.Hl7v2.CreateFromXml.Tests" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="nhapi" Version="3.2.4" />

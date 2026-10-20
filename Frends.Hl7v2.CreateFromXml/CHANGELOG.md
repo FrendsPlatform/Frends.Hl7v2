@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0] - 2026-10-13
+
+### Fixed
+
+- Improve the performance of parsing a message with a large number of repeated groups
+- Increase the number of places where cancellation is checked to avoid long-running operations when cancellation is requested
+
 ## [1.2.0] - 2026-08-06
 
 ### Changed
